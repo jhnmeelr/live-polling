@@ -1,19 +1,13 @@
-var React = require('react');
+import React from 'react';
 
-var Header = React.createClass({
+const Header = ({
+    title
+}) => {
+    return (
+        <header>
+            <h1>{title}</h1>
+        </header>
+    );
+}
 
-    propTypes: {
-        title: React.PropTypes.string.isRequired
-    },
-
-    render() {
-        return (
-            <header>
-                <h1>{this.props.title}</h1>
-            </header>
-        );
-    }
-
-});
-
-module.exports = Header;
+export default Header;
