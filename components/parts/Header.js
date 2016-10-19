@@ -1,6 +1,7 @@
 import React from 'react';
 
 const Header = ({
+    speaker,
     status,
     title
 }) => {
@@ -8,6 +9,7 @@ const Header = ({
         <header className="row">
             <div className="col-xs-10">
                 <h1>{title}</h1>
+                <p>{speaker}</p>
             </div>
             <div className="col-xs-2">
                 <span id="connection-status" className={status}></span>
@@ -17,7 +19,6 @@ const Header = ({
 }
 
 Header.propTypes = {
-    status: React.PropTypes.string.isRequired,
     title: React.PropTypes.string.isRequired
 };
 

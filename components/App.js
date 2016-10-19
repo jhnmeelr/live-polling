@@ -9,6 +9,7 @@ class App extends React.Component {
         this.state = {
             audience: [],
             member: {},
+            speaker: '',
             status: 'disconnected',
             title: ''
         }
@@ -18,9 +19,11 @@ class App extends React.Component {
         this.socket = io('http://localhost:3000');
         this.socket.on('connect', this.connect.bind(this));
         this.socket.on('disconnect', this.disconnect.bind(this));
-        this.socket.on('welcome', this.welcome.bind(this));
+        this.socket.on('welcome', this.updateState.bind(this));
         this.socket.on('joined', this.joined.bind(this));
         this.socket.on('audience', this.updateAudience.bind(this));
+        this.socket.on('start', this.start.bind(this));
+        this.socket.on('end', this.updateState.bind(this));
     }
 
     emit(eventName, payload) {
@@ -28,25 +31,27 @@ class App extends React.Component {
     }
 
     connect() {
-        var member = (sessionStorage.member) ? JSON.parse(sessionStorage.member) : null;
-        if (member) {
-            this.emit('join', member);
-        }
         this.setState({
             status: 'connected'
         });
+        var member = (sessionStorage.member) ? JSON.parse(sessionStorage.member) : null;
+        if (member && member.type ==='audience') {
+            this.emit('join', member);
+        } else if (member && member.type === 'speaker') {
+            this.emit('start', { name: member.name, title: sessionStorage.title })
+        }
     }
 
     disconnect() {
         this.setState({
-            status: 'disconnected'
+            status: 'disconnected',
+            title: 'disconnected',
+            speaker: ''
         });
     }
 
-    welcome(serverState) {
-        this.setState({
-            title: serverState.title
-        });
+    updateState(serverState) {
+        this.setState(serverState);
     }
 
     joined(member) {
@@ -62,10 +67,17 @@ class App extends React.Component {
         });
     }
 
+    start(presentation) {
+        if (this.state.member.type === 'speaker') {
+            sessionStorage.title = presentation.title;
+        }
+        this.setState(presentation);
+    }
+
     render() {
         return (
             <div>
-                <Header title={this.state.title} status={this.state.status} />
+                <Header {...this.state} />
                 {React.cloneElement(this.props.children, {...this.state, emit: this.emit.bind(this)})}
             </div>
         );

@@ -1,10 +1,28 @@
 import React from 'react';
 
+import Attendence from './parts/Attendence';
+import Display from './parts/Display';
+import JoinSpeaker from './parts/JoinSpeaker';
+
 const Speaker = ({
+    audience,
+    emit,
+    member,
     status
 }) => {
     return (
-        <h1>Speaker : {status}</h1>
+        <div>
+            <Display If={status === 'connected'}>
+                <Display If={member.name && member.type === 'speaker'}>
+                    <p>Questions</p>
+                    <Attendence audience={audience} />
+                </Display>
+                <Display If={!member.name}>
+                    <h2>Start the presentation</h2>
+                    <JoinSpeaker emit={emit} />
+                </Display>
+            </Display>
+        </div>
     );
 };
 
