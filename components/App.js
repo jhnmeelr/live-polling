@@ -11,7 +11,9 @@ class App extends React.Component {
             member: {},
             speaker: '',
             status: 'disconnected',
-            title: ''
+            title: '',
+            questions: [],
+            currentQuestion: false
         }
     }
 
@@ -24,6 +26,7 @@ class App extends React.Component {
         this.socket.on('audience', this.updateAudience.bind(this));
         this.socket.on('start', this.start.bind(this));
         this.socket.on('end', this.updateState.bind(this));
+        this.socket.on('ask', this.ask.bind(this));
     }
 
     emit(eventName, payload) {
@@ -72,6 +75,13 @@ class App extends React.Component {
             sessionStorage.title = presentation.title;
         }
         this.setState(presentation);
+    }
+
+    ask(question) {
+        sessionStorage.answer = '';
+        this.setState({
+            currentQuestion: question
+        });
     }
 
     render() {
