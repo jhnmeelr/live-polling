@@ -62,15 +62,15 @@
 
 	var _Audience2 = _interopRequireDefault(_Audience);
 
-	var _Board = __webpack_require__(285);
+	var _Board = __webpack_require__(287);
 
 	var _Board2 = _interopRequireDefault(_Board);
 
-	var _Speaker = __webpack_require__(286);
+	var _Speaker = __webpack_require__(288);
 
 	var _Speaker2 = _interopRequireDefault(_Speaker);
 
-	var _NotFoundPage = __webpack_require__(287);
+	var _NotFoundPage = __webpack_require__(289);
 
 	var _NotFoundPage2 = _interopRequireDefault(_NotFoundPage);
 
@@ -27150,6 +27150,8 @@
 	        var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
 	        _this.state = {
+	            audience: [],
+	            member: {},
 	            status: 'disconnected',
 	            title: ''
 	        };
@@ -27163,10 +27165,21 @@
 	            this.socket.on('connect', this.connect.bind(this));
 	            this.socket.on('disconnect', this.disconnect.bind(this));
 	            this.socket.on('welcome', this.welcome.bind(this));
+	            this.socket.on('joined', this.joined.bind(this));
+	            this.socket.on('audience', this.updateAudience.bind(this));
+	        }
+	    }, {
+	        key: 'emit',
+	        value: function emit(eventName, payload) {
+	            this.socket.emit(eventName, payload);
 	        }
 	    }, {
 	        key: 'connect',
 	        value: function connect() {
+	            var member = sessionStorage.member ? JSON.parse(sessionStorage.member) : null;
+	            if (member) {
+	                this.emit('join', member);
+	            }
 	            this.setState({
 	                status: 'connected'
 	            });
@@ -27186,13 +27199,28 @@
 	            });
 	        }
 	    }, {
+	        key: 'joined',
+	        value: function joined(member) {
+	            sessionStorage.member = JSON.stringify(member);
+	            this.setState({
+	                member: member
+	            });
+	        }
+	    }, {
+	        key: 'updateAudience',
+	        value: function updateAudience(newAudience) {
+	            this.setState({
+	                audience: newAudience
+	            });
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
 	            return _react2.default.createElement(
 	                'div',
 	                null,
 	                _react2.default.createElement(_Header2.default, { title: this.state.title, status: this.state.status }),
-	                _react2.default.cloneElement(this.props.children, _extends({}, this.state))
+	                _react2.default.cloneElement(this.props.children, _extends({}, this.state, { emit: this.emit.bind(this) }))
 	            );
 	        }
 	    }]);
@@ -34656,7 +34684,7 @@
 /* 283 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -34669,17 +34697,32 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var Header = function Header(_ref) {
+	    var status = _ref.status;
 	    var title = _ref.title;
 
 	    return _react2.default.createElement(
-	        'header',
-	        null,
+	        "header",
+	        { className: "row" },
 	        _react2.default.createElement(
-	            'h1',
-	            null,
-	            title
+	            "div",
+	            { className: "col-xs-10" },
+	            _react2.default.createElement(
+	                "h1",
+	                null,
+	                title
+	            )
+	        ),
+	        _react2.default.createElement(
+	            "div",
+	            { className: "col-xs-2" },
+	            _react2.default.createElement("span", { id: "connection-status", className: status })
 	        )
 	    );
+	};
+
+	Header.propTypes = {
+	    status: _react2.default.PropTypes.string.isRequired,
+	    title: _react2.default.PropTypes.string.isRequired
 	};
 
 	exports.default = Header;
@@ -34698,16 +34741,60 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
+	var _Display = __webpack_require__(285);
+
+	var _Display2 = _interopRequireDefault(_Display);
+
+	var _Join = __webpack_require__(286);
+
+	var _Join2 = _interopRequireDefault(_Join);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var Audience = function Audience(_ref) {
-	    var title = _ref.title;
+	    var audience = _ref.audience;
+	    var emit = _ref.emit;
+	    var member = _ref.member;
+	    var status = _ref.status;
 
 	    return _react2.default.createElement(
-	        'h1',
+	        'div',
 	        null,
-	        'Audience : ',
-	        title
+	        _react2.default.createElement(
+	            _Display2.default,
+	            { If: status === 'connected' },
+	            _react2.default.createElement(
+	                _Display2.default,
+	                { If: member.name },
+	                _react2.default.createElement(
+	                    'h2',
+	                    null,
+	                    'Welcome ',
+	                    member.name
+	                ),
+	                _react2.default.createElement(
+	                    'p',
+	                    null,
+	                    audience.length,
+	                    ' audience members connected'
+	                ),
+	                _react2.default.createElement(
+	                    'p',
+	                    null,
+	                    'Questions will appear here.'
+	                )
+	            ),
+	            _react2.default.createElement(
+	                _Display2.default,
+	                { If: !member.name },
+	                _react2.default.createElement(
+	                    'h1',
+	                    null,
+	                    'Join the session'
+	                ),
+	                _react2.default.createElement(_Join2.default, { emit: emit })
+	            )
+	        )
 	    );
 	};
 
@@ -34715,6 +34802,104 @@
 
 /***/ },
 /* 285 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Display = function Display(_ref) {
+	    var children = _ref.children;
+	    var If = _ref.If;
+
+	    return If ? _react2.default.createElement(
+	        'div',
+	        null,
+	        children
+	    ) : null;
+	};
+
+	exports.default = Display;
+
+/***/ },
+/* 286 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var Join = function (_React$Component) {
+	    _inherits(Join, _React$Component);
+
+	    function Join(props) {
+	        _classCallCheck(this, Join);
+
+	        return _possibleConstructorReturn(this, (Join.__proto__ || Object.getPrototypeOf(Join)).call(this, props));
+	    }
+
+	    _createClass(Join, [{
+	        key: 'join',
+	        value: function join() {
+	            var memberName = this.refs.name.value;
+	            this.props.emit('join', { name: memberName });
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var _this2 = this;
+
+	            return _react2.default.createElement(
+	                'form',
+	                { action: 'javascript:void(0)', onSubmit: function onSubmit() {
+	                        return _this2.join();
+	                    } },
+	                _react2.default.createElement(
+	                    'label',
+	                    null,
+	                    'Full Name'
+	                ),
+	                _react2.default.createElement('input', { ref: 'name', className: 'form-control', placeholder: 'enter your full name...', required: true }),
+	                _react2.default.createElement(
+	                    'button',
+	                    { className: 'btn btn-primary' },
+	                    'Join'
+	                )
+	            );
+	        }
+	    }]);
+
+	    return Join;
+	}(_react2.default.Component);
+
+	exports.default = Join;
+
+/***/ },
+/* 287 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -34740,7 +34925,7 @@
 	exports.default = Board;
 
 /***/ },
-/* 286 */
+/* 288 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -34766,10 +34951,14 @@
 	    );
 	};
 
+	Speaker.propTypes = {
+	    status: _react2.default.PropTypes.string
+	};
+
 	exports.default = Speaker;
 
 /***/ },
-/* 287 */
+/* 289 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -34789,7 +34978,7 @@
 	var NotFoundPage = function NotFoundPage() {
 	    return _react2.default.createElement(
 	        'div',
-	        { className: 'not-found' },
+	        { id: 'not-found' },
 	        _react2.default.createElement(
 	            'h1',
 	            null,
