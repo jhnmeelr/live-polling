@@ -9,6 +9,7 @@ class App extends React.Component {
         this.state = {
             audience: [],
             member: {},
+            results: {},
             speaker: '',
             status: 'disconnected',
             title: '',
@@ -27,6 +28,7 @@ class App extends React.Component {
         this.socket.on('start', this.start.bind(this));
         this.socket.on('end', this.updateState.bind(this));
         this.socket.on('ask', this.ask.bind(this));
+        this.socket.on('results', this.updateResults.bind(this));
     }
 
     emit(eventName, payload) {
@@ -80,8 +82,15 @@ class App extends React.Component {
     ask(question) {
         sessionStorage.answer = '';
         this.setState({
-            currentQuestion: question
+            currentQuestion: question,
+            results: { a:0, b:0, c:0, d:0 }
         });
+    }
+
+    updateResults(data) {
+        this.setState({
+            results: data
+        })
     }
 
     render() {

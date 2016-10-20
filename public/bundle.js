@@ -27152,6 +27152,7 @@
 	        _this.state = {
 	            audience: [],
 	            member: {},
+	            results: {},
 	            speaker: '',
 	            status: 'disconnected',
 	            title: '',
@@ -27173,6 +27174,7 @@
 	            this.socket.on('start', this.start.bind(this));
 	            this.socket.on('end', this.updateState.bind(this));
 	            this.socket.on('ask', this.ask.bind(this));
+	            this.socket.on('results', this.updateResults.bind(this));
 	        }
 	    }, {
 	        key: 'emit',
@@ -27234,7 +27236,15 @@
 	        value: function ask(question) {
 	            sessionStorage.answer = '';
 	            this.setState({
-	                currentQuestion: question
+	                currentQuestion: question,
+	                results: { a: 0, b: 0, c: 0, d: 0 }
+	            });
+	        }
+	    }, {
+	        key: 'updateResults',
+	        value: function updateResults(data) {
+	            this.setState({
+	                results: data
 	            });
 	        }
 	    }, {
@@ -35068,7 +35078,12 @@
 	                _react2.default.createElement(
 	                    _reactRouter.Link,
 	                    { to: '/speaker' },
-	                    'Join as speaker'
+	                    'Start the presentation'
+	                ),
+	                _react2.default.createElement(
+	                    _reactRouter.Link,
+	                    { to: '/board' },
+	                    'Go to the board'
 	                )
 	            );
 	        }
@@ -35093,13 +35108,43 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
+	var _Display = __webpack_require__(286);
+
+	var _Display2 = _interopRequireDefault(_Display);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var Board = function Board() {
+	var Board = function Board(_ref) {
+	    var currentQuestion = _ref.currentQuestion;
+	    var results = _ref.results;
+	    var status = _ref.status;
+
 	    return _react2.default.createElement(
-	        'h1',
-	        null,
-	        'Board'
+	        'div',
+	        { id: 'scoreboard' },
+	        _react2.default.createElement(
+	            _Display2.default,
+	            { If: status === 'connected' && currentQuestion },
+	            _react2.default.createElement(
+	                'h3',
+	                null,
+	                currentQuestion.q
+	            ),
+	            _react2.default.createElement(
+	                'p',
+	                null,
+	                JSON.stringify(results)
+	            )
+	        ),
+	        _react2.default.createElement(
+	            _Display2.default,
+	            { If: status === 'connected' && !currentQuestion },
+	            _react2.default.createElement(
+	                'h3',
+	                null,
+	                'Awaiting a Question...'
+	            )
+	        )
 	    );
 	};
 
