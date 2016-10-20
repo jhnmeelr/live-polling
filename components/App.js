@@ -19,7 +19,7 @@ class App extends React.Component {
     }
 
     componentWillMount() {
-        this.socket = io('https://live-polling-socket.herokuapp.com/');
+        this.socket = io('http://localhost:3000');
         this.socket.on('connect', this.connect.bind(this));
         this.socket.on('disconnect', this.disconnect.bind(this));
         this.socket.on('welcome', this.updateState.bind(this));
